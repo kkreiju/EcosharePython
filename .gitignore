@@ -1,0 +1,4 @@
+.env
+.venv
+__pycache__/
+model_files/cnn_model.h5
