@@ -1,5 +1,5 @@
-import numpy as np
-from PIL import Image
+import numpy as np # type: ignore
+from PIL import Image # type: ignore
 
 def preprocess_image(image_file, target_size=(224, 224)):
     image = Image.open(image_file).convert('RGB')

@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow as tf # type: ignore
 from tensorflow.keras.models import Sequential # type: ignore
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout # type: ignore
 from tensorflow.keras.preprocessing.image import ImageDataGenerator # type: ignore
@@ -7,22 +7,24 @@ import os
 # Configuration
 IMAGE_SIZE = (224, 224)
 BATCH_SIZE = 32
-EPOCHS = 10
+EPOCHS = 20
+CLASS_SIZE = 18
 MODEL_PATH = 'model_files/cnn_model.h5'
 
-# Folder structure:
-# dataset/
-# ├── low_nutrient/
-# ├── medium_nutrient/
-# └── high_nutrient/
+# Data directory
 DATA_DIR = 'dataset'
 
-# 1. Data Augmentation & Loading
+# Data Augmentation & Loading
 train_datagen = ImageDataGenerator(
     rescale=1./255,
-    validation_split=0.2, # Set to 0 for no validation split, 0.2 for 20% validation (later on)
+    validation_split=0.2,
     horizontal_flip=True,
-    zoom_range=0.2
+    rotation_range=20,
+    zoom_range=0.2,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.15,
+    fill_mode='nearest'
 )
 
 train_generator = train_datagen.flow_from_directory(
@@ -41,31 +43,34 @@ val_generator = train_datagen.flow_from_directory(
     subset='validation'
 )
 
-# 2. Build CNN Model
+# Build CNN Model
 model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=(*IMAGE_SIZE, 3)),
+    Conv2D(64, (3, 3), activation='relu', input_shape=(*IMAGE_SIZE, 3)),
     MaxPooling2D(2, 2),
-    Conv2D(64, (3, 3), activation='relu'),
+    Conv2D(128, (3, 3), activation='relu'),
+    MaxPooling2D(2, 2),
+    Conv2D(256, (3, 3), activation='relu'),
     MaxPooling2D(2, 2),
     Flatten(),
-    Dense(128, activation='relu'),
-    Dropout(0.3),
-    Dense(3, activation='softmax')  # 3 classes: low, medium, high
+    Dense(512, activation='relu'),
+    Dropout(0.5),
+    Dense(CLASS_SIZE, activation='softmax')
 ])
 
-model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
 
-# 3. Train Model
+# Train Model
 model.fit(
     train_generator,
     validation_data=val_generator,
     epochs=EPOCHS
 )
 
-# 4. Save Model
+# Save Model
 os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
 model.save(MODEL_PATH)
-
 print(f"Model saved to {MODEL_PATH}")

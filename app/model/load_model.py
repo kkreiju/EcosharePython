@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow as tf # type: ignore
 import os
 
 MODEL_PATH = os.getenv("MODEL_PATH", "model_files/cnn_model.h5")
