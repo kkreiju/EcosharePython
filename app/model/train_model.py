@@ -88,3 +88,14 @@ model.fit(
 os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
 model.save(MODEL_PATH)
 print(f"Model saved to {MODEL_PATH}")
+
+# Convert and save as TensorFlow Lite model
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+tflite_model = converter.convert()
+
+# Save TFLite model
+tflite_path = MODEL_PATH.replace('.keras', '.tflite')
+with open(tflite_path, 'wb') as f:
+    f.write(tflite_model)
+print(f"TensorFlow Lite model saved to {tflite_path}")
