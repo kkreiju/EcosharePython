@@ -59,14 +59,18 @@ def start_ngrok():
         except:
             pass
         
-        # Start ngrok tunnel with correct path
+        # Start ngrok tunnel with correct path (silently)
         if sys.platform == "win32":
-            # Windows - start in new console window
+            # Windows - start silently without console window
             subprocess.Popen(['ngrok/ngrok.exe', 'http', '5000'], 
-                            creationflags=0x00000010)  # CREATE_NEW_CONSOLE value
+                            stdout=subprocess.DEVNULL, 
+                            stderr=subprocess.DEVNULL,
+                            creationflags=0x00000008)  # DETACHED_PROCESS
         else:
-            # Unix/Linux/Mac - start normally
-            subprocess.Popen(['./ngrok/ngrok', 'http', '5000'])
+            # Unix/Linux/Mac - start silently
+            subprocess.Popen(['./ngrok/ngrok', 'http', '5000'],
+                           stdout=subprocess.DEVNULL, 
+                           stderr=subprocess.DEVNULL)
             
         print("⏳ Waiting for ngrok tunnel to establish...")
         
