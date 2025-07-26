@@ -53,8 +53,13 @@ def start_ngrok():
         
         # Kill any existing ngrok processes that might be hanging
         try:
-            subprocess.run(['taskkill', '/f', '/im', 'ngrok.exe'], 
-                          capture_output=True, shell=True, check=False)
+            if sys.platform == "win32":
+                subprocess.run(['taskkill', '/f', '/im', 'ngrok.exe'], 
+                              capture_output=True, shell=True, check=False)
+            else:
+                # Linux/Unix - kill ngrok processes
+                subprocess.run(['pkill', '-f', 'ngrok'], 
+                              capture_output=True, check=False)
             time.sleep(1)
         except:
             pass
