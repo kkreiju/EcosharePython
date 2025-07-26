@@ -3,7 +3,11 @@ import subprocess
 import threading
 import time
 import requests
-import json
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = create_app()
 
@@ -38,11 +42,39 @@ def start_ngrok():
         public_url = get_ngrok_url()
         if public_url:
             print(f"🌐 Public URL: {public_url}")
+            notify_ngrok_url()
         else:
             print("⚠️ Could not retrieve public URL")
             
     except Exception as e:
         print(f"Could not start ngrok: {e}")
+
+# Fetch https://ecoshare-backend-api.vercel.app/api/ngrok with a POST request passing the ngrok URL and id from env
+def notify_ngrok_url():
+    """Notify the backend API with the ngrok URL"""
+    public_url = get_ngrok_url()
+    ngrok_id = os.getenv('NGROK_ID')
+    ngrok_api = os.getenv('NGROK_API')
+    
+    if not ngrok_id:
+        print("⚠️ NGROK_ID not found in environment variables")
+        return
+    
+    if not ngrok_api:
+        print("⚠️ NGROK_API not found in environment variables")
+        return
+        
+    if public_url:
+        try:
+            response = requests.post(ngrok_api, json={"url": public_url, "id": ngrok_id})
+            if response.status_code == 200:
+                print(f"✅ Successfully notified backend API with ngrok URL")
+            else:
+                print(f"❌ Failed to notify backend API: {response.status_code}")
+        except Exception as e:
+            print(f"Could not notify backend API: {e}")
+    else:
+        print("⚠️ No public URL to notify")
 
 if __name__ == '__main__':
     # Start ngrok in background
