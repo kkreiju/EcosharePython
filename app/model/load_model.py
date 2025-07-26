@@ -1,7 +1,6 @@
 import tensorflow as tf # type: ignore
-import os
 
-MODEL_PATH = os.getenv("MODEL_PATH", "model_files/cnn_model.keras")
+MODEL_PATH = "model_files/plant_model.keras"
 
 def load_model():
     model = tf.keras.models.load_model(MODEL_PATH)
