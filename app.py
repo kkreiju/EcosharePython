@@ -25,13 +25,39 @@ def get_ngrok_url():
         print(f"Could not get ngrok URL: {e}")
         return None
 
+def check_ngrok_running():
+    """Check if ngrok is already running and accessible"""
+    try:
+        response = requests.get("http://127.0.0.1:4040/api/tunnels", timeout=2)
+        if response.status_code == 200:
+            tunnels = response.json()
+            return len(tunnels.get('tunnels', [])) > 0
+    except:
+        pass
+    return False
+
 def start_ngrok():
     """Start ngrok tunnel in a separate thread"""
     try:
-        # Kill any existing ngrok processes
-        subprocess.run(['taskkill', '/f', '/im', 'ngrok.exe'], 
-                      capture_output=True, shell=True)
-        time.sleep(2)
+        # First check if ngrok is already running
+        if check_ngrok_running():
+            print("🔄 ngrok is already running, using existing tunnel")
+            time.sleep(2)  # Small delay to ensure tunnel is stable
+            public_url = get_ngrok_url()
+            if public_url:
+                print(f"🌐 Existing Public URL: {public_url}")
+                notify_ngrok_url()
+            return
+        
+        print("🚀 Starting new ngrok tunnel...")
+        
+        # Kill any existing ngrok processes that might be hanging
+        try:
+            subprocess.run(['taskkill', '/f', '/im', 'ngrok.exe'], 
+                          capture_output=True, shell=True, check=False)
+            time.sleep(1)
+        except:
+            pass
         
         # Start ngrok tunnel with correct path
         if sys.platform == "win32":
@@ -42,16 +68,20 @@ def start_ngrok():
             # Unix/Linux/Mac - start normally
             subprocess.Popen(['./ngrok/ngrok', 'http', '5000'])
             
-        print("🚀 ngrok tunnel started! Check http://127.0.0.1:4040 for public URL")
+        print("⏳ Waiting for ngrok tunnel to establish...")
         
-        # Wait a bit for tunnel to establish and then print the URL
-        time.sleep(5)
-        public_url = get_ngrok_url()
-        if public_url:
-            print(f"🌐 Public URL: {public_url}")
-            notify_ngrok_url()
-        else:
-            print("⚠️ Could not retrieve public URL")
+        # Wait for tunnel to establish with better checking
+        max_attempts = 10
+        for attempt in range(max_attempts):
+            time.sleep(1)
+            if check_ngrok_running():
+                public_url = get_ngrok_url()
+                if public_url:
+                    print(f"🌐 New Public URL: {public_url}")
+                    notify_ngrok_url()
+                    return
+        
+        print("⚠️ Could not establish ngrok tunnel after 10 seconds")
             
     except Exception as e:
         print(f"Could not start ngrok: {e}")
