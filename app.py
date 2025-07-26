@@ -4,6 +4,7 @@ import threading
 import time
 import requests
 import os
+import sys
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -33,8 +34,14 @@ def start_ngrok():
         time.sleep(2)
         
         # Start ngrok tunnel with correct path
-        subprocess.Popen(['ngrok/ngrok.exe', 'http', '5000'], 
-                        creationflags=subprocess.CREATE_NEW_CONSOLE)
+        if sys.platform == "win32":
+            # Windows - start in new console window
+            subprocess.Popen(['ngrok/ngrok.exe', 'http', '5000'], 
+                            creationflags=0x00000010)  # CREATE_NEW_CONSOLE value
+        else:
+            # Unix/Linux/Mac - start normally
+            subprocess.Popen(['./ngrok/ngrok', 'http', '5000'])
+            
         print("🚀 ngrok tunnel started! Check http://127.0.0.1:4040 for public URL")
         
         # Wait a bit for tunnel to establish and then print the URL
