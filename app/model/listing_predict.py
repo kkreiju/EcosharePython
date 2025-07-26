@@ -1,7 +1,7 @@
 from .load_model import load_listing_model
-from .utils import preprocess_image
+from .utils import preprocess_base64_image
 
-# Class names for plant health classification
+# Class names for listing classification
 CLASS_NAMES = [
     'Banana Peels', 'Coffee Grounds', 'Crushed Eggshell',
     'Dried Leaves', 'Mango Peels', 'Orange Peels', 'Saw Dust', 'Vegetable Scraps'
@@ -9,24 +9,20 @@ CLASS_NAMES = [
 
 def predict_class(image_file):
     model = load_listing_model()  # Lazy load the model
-    processed_image = preprocess_image(image_file)
+    processed_image = preprocess_base64_image(image_file)
     predictions = model.predict(processed_image)
     predicted_index = predictions.argmax()
     confidence = float(predictions[0][predicted_index])
-
-    if confidence < 0.6:
-        return {'prediction': 'Other', 'confidence': round(confidence * 100, 2)}
 
     return {
         'prediction': CLASS_NAMES[predicted_index],
         'confidence': round(confidence * 100, 2)
     }
 
-
-# New function: get top 3 predictions
-def predict_top3(image_file):
+def predict_top3(base64_image):
+    """Get top 3 predictions from base64 image"""
     model = load_listing_model()  # Lazy load the model
-    processed_image = preprocess_image(image_file)
+    processed_image = preprocess_base64_image(base64_image)
     predictions = model.predict(processed_image)[0]
     top3_indices = predictions.argsort()[-3:][::-1]
     results = []
