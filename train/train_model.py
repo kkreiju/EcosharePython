@@ -13,11 +13,11 @@ EPOCHS = 100
 # If you have a small dataset, you might want to increase the number of epochs. 50–200 epochs
 # For larger datasets, you can reduce it to avoid overfitting. 10–50 epochs
 
-CLASS_SIZE = 8
-MODEL_PATH = 'model_files/cnn_model.keras' # Define the path to save the model
+CLASS_SIZE = 18
+MODEL_PATH = 'model_files/cnn_model.h5' # Define the path to save the model
 
 # Data directory
-DATA_DIR = 'dataset/Listing'
+DATA_DIR = 'dataset/Plant'
 
 # Data Augmentation & Loading
 train_datagen = ImageDataGenerator(

@@ -14,8 +14,8 @@ if gpus:
     except RuntimeError as e:
         print(f"GPU configuration error: {e}")
 
-PLANT_MODEL_PATH = "model_files/plant_model.keras"
-LISTING_MODEL_PATH = "model_files/listing_model.keras"
+PLANT_MODEL_PATH = "model_files/plant_model.h5"
+LISTING_MODEL_PATH = "model_files/listing_model.h5"
 
 # Global variables for lazy loading
 _plant_model = None
